@@ -1,16 +1,19 @@
 package com.slimeist.chickenhat.common.items;
 
+import com.slimeist.chickenhat.ChickenHat;
 import com.slimeist.chickenhat.common.entities.DyedEggEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.EggEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.Stats;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import java.awt.*;
 
 public class DyedEgg extends DyeableItem {
     public DyedEgg(Properties properties) {
@@ -33,5 +36,27 @@ public class DyedEgg extends DyeableItem {
         }
 
         return ActionResult.sidedSuccess(itemstack, worldIn.isClientSide());
+    }
+
+    @Override
+    public int getColor(ItemStack stack) {
+        CompoundNBT compoundnbt = stack.getTagElement("display");
+        return compoundnbt != null && compoundnbt.contains("color", 99) ? compoundnbt.getInt("color") : 8355969;
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public int getDisplayColor(ItemStack stack) {
+        long time = ChickenHat.proxy.getGameTime();
+        int cycle_length = 400; //match cycle length for sheep (16 wool colors, 25 ticks each)
+        int offset = stack.hashCode();
+        if (stack.getEntityRepresentation()!=null) {
+            offset = stack.getEntityRepresentation().getId();
+        }
+        float hue = (time + (offset*25)) % cycle_length;
+        hue /= cycle_length;
+        int rainbowColor = Color.HSBtoRGB(hue, 1.0f, 1.0f);
+        CompoundNBT compoundnbt = stack.getTagElement("display");
+        return compoundnbt != null && compoundnbt.contains("color", 99) ? compoundnbt.getInt("color") : rainbowColor;
     }
 }
