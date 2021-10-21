@@ -1,44 +1,39 @@
 package com.slimeist.chickenhat.client.render.entity;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.slimeist.chickenhat.ChickenHat;
-import com.slimeist.chickenhat.client.render.model.FakeChickenModel;
-import com.slimeist.chickenhat.common.entities.FakeChickenEntity;
+import com.slimeist.chickenhat.client.render.model.DyedChickenModel;
+import com.slimeist.chickenhat.common.entities.DyedChickenEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.model.AbstractTropicalFishModel;
-import net.minecraft.client.renderer.entity.model.ChickenModel;
-import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.passive.SheepEntity;
-import net.minecraft.entity.passive.fish.TropicalFishEntity;
 import net.minecraft.item.DyeColor;
-import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.world.biome.BiomeColors;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.apache.logging.log4j.Level;
 
 import java.awt.*;
 
 @OnlyIn(Dist.CLIENT)
-public class FakeChickenRenderer extends MobRenderer<FakeChickenEntity, FakeChickenModel<FakeChickenEntity>> {
+public class DyedChickenRenderer extends MobRenderer<DyedChickenEntity, DyedChickenModel<DyedChickenEntity>> {
     private static final ResourceLocation CHICKEN_LOCATION = new ResourceLocation("textures/entity/chicken.png");
 
-    public FakeChickenRenderer(EntityRendererManager p_i47211_1_) {
-        super(p_i47211_1_, new FakeChickenModel<>(), 0.0F);
+    public DyedChickenRenderer(EntityRendererManager p_i47211_1_) {
+        super(p_i47211_1_, new DyedChickenModel<>(), 0.0F);
         this.shadowStrength = 0.0F;
         this.shadowRadius = 0.0F;
         shadowStrength = 0.0F;
         shadowRadius = 0.0F;
     }
 
-    public ResourceLocation getTextureLocation(FakeChickenEntity p_110775_1_) {
+    public ResourceLocation getTextureLocation(DyedChickenEntity p_110775_1_) {
         return CHICKEN_LOCATION;
     }
 
-    protected float getBob(FakeChickenEntity p_77044_1_, float p_77044_2_) {
+    protected float getBob(DyedChickenEntity p_77044_1_, float p_77044_2_) {
         float f = MathHelper.lerp(p_77044_2_, p_77044_1_.oFlap, p_77044_1_.flap);
         float f1 = MathHelper.lerp(p_77044_2_, p_77044_1_.oFlapSpeed, p_77044_1_.flapSpeed);
         return (MathHelper.sin(f) + 1.0F) * f1;
@@ -53,7 +48,7 @@ public class FakeChickenRenderer extends MobRenderer<FakeChickenEntity, FakeChic
         return new int[]{c.getRed(), c.getGreen(), c.getBlue()};
     }
 
-    public void render(FakeChickenEntity entity, float p_225623_2_, float partialTicks, MatrixStack p_225623_4_, IRenderTypeBuffer p_225623_5_, int p_225623_6_) {
+    public void render(DyedChickenEntity entity, float p_225623_2_, float partialTicks, MatrixStack p_225623_4_, IRenderTypeBuffer p_225623_5_, int p_225623_6_) {
         int color = entity.getColor();
 
         int[] c = unpackColor(color);
@@ -61,8 +56,16 @@ public class FakeChickenRenderer extends MobRenderer<FakeChickenEntity, FakeChic
         if (entity.hasCustomName()) {
             if ("slimeist_".equals(entity.getName().getContents())) { //modern rainbow
                 int cycle_length = 400; //match cycle length for sheep (16 wool colors, 25 ticks each)
-                float hue = ((entity.tickCount + entity.getId()) % cycle_length);
+                float hue = (entity.tickCount+partialTicks+(entity.getId()*25)) % cycle_length;
                 hue /= cycle_length;
+
+                /*int ticks = 25;
+                int stages = DyeColor.values().length;
+                int i = entity.tickCount / ticks + entity.getId();
+                int nowId = i % stages;
+                int nextId = (i + 1) % stages;
+                float between = ((float)(entity.tickCount % ticks) + partialTicks) / (float)ticks;
+                float hue = nowId * (1.0F - between) + nextId * between;*/
                 int overridingColor = Color.HSBtoRGB(hue, 1.0f, 1.0f);
                 c = unpackColor(overridingColor);
                 //ChickenHat.LOGGER.log(Level.INFO, "Thanks jeb_");
@@ -85,6 +88,12 @@ public class FakeChickenRenderer extends MobRenderer<FakeChickenEntity, FakeChic
                 int g2 = (int)(g1*255);
                 int b2 = (int)(b1*255);
                 c = new int[]{r2, g2, b2};
+            } else if ("creeper".equals(entity.getName().getContents())) { //disguise with grass color!
+                double divisor = 1.514690406168031;
+                c = unpackColor(BiomeColors.getAverageGrassColor(entity.level, entity.blockPosition()));
+                c[0] = (int) (c[0]/divisor);
+                c[1] = (int) (c[1]/divisor);
+                c[2] = (int) (c[2]/divisor);
             }
         }
 

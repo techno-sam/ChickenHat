@@ -6,21 +6,30 @@ license="All rights reserved"
 modId="chickenhat"
 version="1.0"
 displayName="Chicken Hat"
-authors="Slimeist for code and textures"
+authors="Slimeist"
+credits="Slimeist for main code and textures, SlimeKnights for piggy back system (which is called Chickencarry in this mod), Vazkii for mob spawning systems"
 description='''
-Adds a helmet that allows you to glide like a chicken
+Creates new uses for chickens, notably, a new type of chicken that is dyeable, and a helmet to wear such chickens on your head.
 '''
+license="Code, textures, and binaries are licensed under the GNU GPL v3 license."
 
-[[dependencies.myfirstmod]]
+[[dependencies.chickenhat]]
     modId="forge"
     mandatory=true
     versionRange="[36,)"
     ordering="NONE"
     side="BOTH"
 
-[[dependencies.myfirstmod]]
+[[dependencies.chickenhat]]
     modId="minecraft"
     mandatory=true
     versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"
+
+[[dependencies.chickenhat]]
+modId="mantle"
+mandatory=true
+versionRange="[1.6.10 8,)"
+ordering="NONE"
+side="BOTH"
